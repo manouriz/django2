@@ -115,11 +115,11 @@ def submit(request, course_id):
     enrollment = Enrollment.objects.get(user=user, course=course)
     submission = Submission.objects.create(enrollment=enrollment)
     answers = extract_answers(request)
-    submission.choices_ids = answers
-    for choice_id in answers:
-        choice = get_object_or_404(Choice, pk=choice_id)
-        if choice is not None:
-            submission.choices.add(choice)
+    if answers:
+        for choice_id in answers:
+            choice = get_object_or_404(Choice, pk=choice_id)
+            if choice is not None:
+                submission.choices.add(choice)
     return show_exam_result(request, course.id, submission.id)
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
@@ -144,15 +144,17 @@ def show_exam_result(request, course_id, submission_id):
     course = get_object_or_404(Course, pk=course_id)
     context['course'] = course
     submission = get_object_or_404(Submission, pk=submission_id)
-    answers = submission.choices_ids
+    answers = extract_ids(submission.choices.all())
     grade = 0
     total = 0
     for question in course.question_set.all():
-        if question.is_get_score(answers) == True:
-            grade = grade + question.grade
-        total = total + grade
-        print(grade)
+        print("Question grade: " + str(question.grade))
+        if question.is_get_score(answers):
+            grade += question.grade
+        total += question.grade
 
+    print("Answers: " + str(answers) + ", Grade: " + str(grade) + ", Total: " + str(total))
+    
     if total > 0:
         context['grade'] = (grade / total) * 100
     else:
@@ -162,6 +164,10 @@ def show_exam_result(request, course_id, submission_id):
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
     #return HttpResponseRedirect(reverse(viewname='onlinecourse:show_exam_result', args=(course.id,submission.id)))
 
-    
+def extract_ids(objs):
+    ids = []
+    for obj in objs:
+        ids.append(obj.id)
+    return ids
 
 

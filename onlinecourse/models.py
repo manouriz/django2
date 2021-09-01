@@ -121,6 +121,10 @@ class Question(models.Model):
         else:
             return False
 
+    def __str__(self):
+        return "Lesson: " + str(self.lesson.id) + ", " + \
+               "Grade: " + str(self.grade) + ", " + \
+               "Text: " + self.text
 
 
 
@@ -142,5 +146,5 @@ class Choice(models.Model):
 class Submission(models.Model):
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
     choices = models.ManyToManyField(Choice)
-    choices_ids = []
+    
 #    Other fields and methods you would like to design
