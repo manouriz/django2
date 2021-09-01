@@ -145,6 +145,7 @@ def show_exam_result(request, course_id, submission_id):
     context['course'] = course
     submission = get_object_or_404(Submission, pk=submission_id)
     answers = extract_ids(submission.choices.all())
+    context['answers'] = answers
     grade = 0
     total = 0
     for question in course.question_set.all():
@@ -156,7 +157,7 @@ def show_exam_result(request, course_id, submission_id):
     print("Answers: " + str(answers) + ", Grade: " + str(grade) + ", Total: " + str(total))
     
     if total > 0:
-        context['grade'] = (grade / total) * 100
+        context['grade'] = int((grade / total) * 100)
     else:
         context['grade'] = 0.0
 
