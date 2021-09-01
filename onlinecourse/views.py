@@ -145,10 +145,19 @@ def show_exam_result(request, course_id, submission_id):
     context['course'] = course
     submission = get_object_or_404(Submission, pk=submission_id)
     answers = submission.choices_ids
-    grade = 0    
+    grade = 0
+    total = 0
     for question in course.question_set.all():
         if question.is_get_score(answers) == True:
             grade = grade + question.grade
+        total = total + grade
+        print(grade)
+
+    if total > 0:
+        context['grade'] = (grade / total) * 100
+    else:
+        context['grade'] = 0.0
+
     #template_name = 'onlinecourse/exam_result_bootstrap.html'
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
     #return HttpResponseRedirect(reverse(viewname='onlinecourse:show_exam_result', args=(course.id,submission.id)))
